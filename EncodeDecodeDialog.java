@@ -24,13 +24,7 @@ import java.awt.GridBagLayout;
 import java.awt.HeadlessException;
 import java.io.IOException;
 
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -57,6 +51,7 @@ public class EncodeDecodeDialog extends AbstractFrame {
 	private JPanel jPanel = null;
 
 	private ZapTextArea inputField = null;
+	private JCheckBox   encodeAllSymbolsCheckBox = null;
 	private ZapTextArea base64EncodeField = null;
 	private ZapTextArea base64DecodeField = null;
 	private ZapTextArea urlEncodeField = null;
@@ -153,6 +148,9 @@ public class EncodeDecodeDialog extends AbstractFrame {
 			jPanel4.setLayout(new GridBagLayout());
 
 			// 3 tabs - Encode, Decode, Hash??
+			JCheckBox encAllSym = getEncodeAllSymbolsCheckBox();
+			encAllSym.setText("enc2.label.encAllSym");
+			jPanel1.add(encAllSym);
 			addField(jPanel1, 1, getBase64EncodeField(), Constant.messages.getString("enc2.label.b64Enc"));
 			addField(jPanel1, 2, getUrlEncodeField(), Constant.messages.getString("enc2.label.urlEnc"));
 			addField(jPanel1, 3, getAsciiHexEncodeField(), Constant.messages.getString("enc2.label.asciiEnc"));
@@ -275,6 +273,13 @@ public class EncodeDecodeDialog extends AbstractFrame {
             });
 		}
 		return inputField;
+	}
+
+	private JCheckBox getEncodeAllSymbolsCheckBox() {
+		if (encodeAllSymbolsCheckBox == null) {
+			encodeAllSymbolsCheckBox = new JCheckBox();
+		}
+		return encodeAllSymbolsCheckBox;
 	}
 
 	private ZapTextArea getBase64EncodeField() {
@@ -440,7 +445,10 @@ public class EncodeDecodeDialog extends AbstractFrame {
 		}
 
 		// URLs
-		urlEncodeField.setText(getEncoder().getURLEncode(getInputField().getText()));
+		if (encodeAllSymbolsCheckBox.isSelected())
+			urlEncodeField.setText(AllSymbolsURLEncoder.safeEncodeURL(getInputField().getText(), "UTF8"));
+		else
+			urlEncodeField.setText(getEncoder().getURLEncode(getInputField().getText()));
 		try {
 			urlDecodeField.setText(getEncoder().getURLDecode(getInputField().getText()));
 		} catch (final Exception e) {
@@ -463,9 +471,10 @@ public class EncodeDecodeDialog extends AbstractFrame {
 		asciiHexDecodeField.setEnabled(asciiHexDecodeField.getText().length() > 0);
 
 		// HTML
-		HTMLEncodeField.setText(
-				getEncoder().getHTMLString(
-						getInputField().getText()));
+		if (encodeAllSymbolsCheckBox.isSelected())
+			HTMLEncodeField.setText(AllSymbolsURLEncoder.escapeHtml(getInputField().getText()));
+		else
+			HTMLEncodeField.setText(getEncoder().getHTMLString(getInputField().getText()));
 
 		try {
 			HTMLDecodeField.setText(decodeHTMLString(getInputField().getText()));
