@@ -444,9 +444,11 @@ public class EncodeDecodeDialog extends AbstractFrame {
 			base64DecodeField.setEnabled(false);
 		}
 
+		boolean encodeAllSymbols = encodeAllSymbolsCheckBox.isSelected();
+
 		// URLs
-		if (encodeAllSymbolsCheckBox.isSelected())
-			urlEncodeField.setText(AllSymbolsURLEncoder.safeEncodeURL(getInputField().getText(), "UTF8"));
+		if (encodeAllSymbols)
+			urlEncodeField.setText(AllSymbolsEncoder.safeEncodeURL(getInputField().getText(), "UTF8"));
 		else
 			urlEncodeField.setText(getEncoder().getURLEncode(getInputField().getText()));
 		try {
@@ -471,8 +473,8 @@ public class EncodeDecodeDialog extends AbstractFrame {
 		asciiHexDecodeField.setEnabled(asciiHexDecodeField.getText().length() > 0);
 
 		// HTML
-		if (encodeAllSymbolsCheckBox.isSelected())
-			HTMLEncodeField.setText(AllSymbolsURLEncoder.escapeHtml(getInputField().getText()));
+		if (encodeAllSymbols)
+			HTMLEncodeField.setText(AllSymbolsEncoder.escapeHtml(getInputField().getText()));
 		else
 			HTMLEncodeField.setText(getEncoder().getHTMLString(getInputField().getText()));
 
@@ -485,9 +487,10 @@ public class EncodeDecodeDialog extends AbstractFrame {
 		HTMLDecodeField.setEnabled(HTMLDecodeField.getText().length() > 0);
 
 		// JavaScript
-		JavaScriptEncodeField.setText(
-				getEncoder().getJavaScriptString(
-						getInputField().getText()));
+		if (encodeAllSymbols)
+			JavaScriptEncodeField.setText(AllSymbolsEncoder.getJavaScriptString(getInputField().getText()));
+		else
+			JavaScriptEncodeField.setText(getEncoder().getJavaScriptString(getInputField().getText()));
 
 		try {
 			JavaScriptDecodeField.setText(decodeJavaScriptString(getInputField().getText()));

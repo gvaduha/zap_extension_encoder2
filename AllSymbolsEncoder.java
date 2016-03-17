@@ -58,25 +58,50 @@ public class AllSymbolsEncoder {
     }
 
     /**
-     * Convert *all* symbols to #XXXX representation
+     * Convert *all* symbols to &#XX; representation
      */
     public static String escapeHtml(String s) {
-
         if (s == null || s.isEmpty())
             return s;
 
-        StringWriter writer = new StringWriter((int)((double)s.length() * 1.5D));
+        StringWriter out = new StringWriter(s.length() * 4);
 
-        int len = s.length();
-
-        for(int i = 0; i < len; ++i) {
+        for(int i = 0; i < s.length(); ++i) {
             char c = s.charAt(i);
-            writer.write("&#");
-            writer.write(Integer.toString(c, 10));
-            writer.write(59);
+            out.write("&#");
+            if (c < 0x10)
+                out.write('0');
+            out.write(Integer.toString(c, 10));
+            out.write(';');
         }
 
-        return writer.toString();
+        return out.toString();
     }
 
+
+    /**
+     * Convert *all* symbols to uXXXX representation
+     */
+    public static String getJavaScriptString(String s) {
+        if (s == null || s.isEmpty())
+            return s;
+
+        StringWriter out = new StringWriter(s.length()*6);
+
+        for(int i = 0; i < s.length(); ++i) {
+            char c = s.charAt(i);
+
+            if(c > 0xFFF) {
+                out.write("\\u" + Integer.toString(c, 16));
+            } else if(c > 0xFF) {
+                out.write("\\u0" + Integer.toString(c, 16));
+            } else if(c > 0xF) {
+                out.write("\\u00" + Integer.toString(c, 16));
+            } else {
+                out.write("\\u000" + Integer.toString(c, 16));
+            }
+        }
+
+        return out.toString();
+    }
 }
